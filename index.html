@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saper - Atividade Pokémon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container bg-white">
+        <form class="row g-3 pt-3">
+            <div class="col">
+                <input type="text" readonly class="form-control-plaintext" id="staticEmail2"
+                    value="Digite o nome do Pokémon">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" id="inputPokemon" placeholder="Mewtwo">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary mb-3"
+                    onclick="fetchPokemon(inputPokemon.value); return false" onsubmit="return false;">Carregar
+                    dados</button>
+            </div>
+        </form>
+        <div class="row bg-light gx-5 rounded my-md-3 my-sm-0">
+            <div class="col text-dark">
+                <h1 class="h2 text-center name">????</h1>
+            </div>
+        </div>
+        <div class="row rounded g-0 gx-5">
+            <div class="col-sm-12 col-md-6 bg-light rounded shadow-sm">
+                <div class="text-center">
+                    <img src="" class="mx-auto d-block w-50" alt="Deveria aparecer um Pokémon aqui." id="sprite">
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6 bg-light d-flex align-items-center rounded shadow-sm">
+                <ul class="list-group list-group-flush w-100 stats">
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                        HP:
+                        <span>??</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                        Attack:
+                        <span>??</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                        Defense:
+                        <span>??</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                        Special Attack:
+                        <span>??</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                        Special Defense:
+                        <span>??</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                        Speed:
+                        <span>??</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        // Função auxiliar para selecionar um elemento pelo seletor CSS
+        const qS = (selector) => document.querySelector(selector);
+        // Função auxiliar para definir o texto de um elemento
+        function setText(selector, text) {
+            let element = document.querySelector(selector);
+            element.textContent = text;
+        }
+        // Define o nome do Pokémon no elemento de classe 'name'
+        function setName({ name }) {
+            if (!name) {
+                // Se não houver um nome, define o conteúdo do elemento como vazio
+                qS('.name').textContent = '';
+                return;
+            }
+            // Define o conteúdo do elemento como o nome em letras maiúsculas
+            qS('.name').textContent = name.toUpperCase();
+        }
+        // Define a imagem do Pokémon no elemento com ID 'sprite'
+        function setSprite({ sprites }) {
+            const imgElement = qS('#sprite');
+            if (!sprites || !sprites.front_default) {
+                // Se não houver sprites ou a sprite padrão não estiver disponível, define a imagem como vazia e adiciona a classe 'placeholder'
+                imgElement.src = '';
+                imgElement.classList.add('placeholder');
+            } else {
+                // Remove a classe 'placeholder' e define a imagem como a sprite padrão
+                imgElement.classList.remove('placeholder');
+                imgElement.src = sprites.front_default;
+            }
+        }
+        // Define as estatísticas do Pokémon nas tags de lista existentes
+        function setStats({ stats }) {
+            const statsListItems = qS('.stats').getElementsByTagName('li');
+            if (!stats) {
+                // Se não houver estatísticas, define o valor para cada item da lista como um espaço vazio
+                for (const listItem of statsListItems) {
+                    listItem.querySelector('span').textContent = '';
+                }
+                return;
+            }
+            for (let i = 0; i < stats.length; i++) {
+                const { base_stat, stat: { name } } = stats[i];
+                const listItem = statsListItems[i];
+                // Define o conteúdo do elemento com o nome da estatística e o valor da base_stat
+                listItem.querySelector('span').textContent = base_stat;
+            }
+        }
+        // Limpa os dados do Pokémon, definindo todas as propriedades como vazias
+        function cleanPokemonData() {
+            setPokemonData({ sprites: undefined, name: '', stats: undefined });
+        }
+        // Define os dados do Pokémon e chama as funções para atualizar o nome, a imagem e as estatísticas
+        function setPokemonData(pokemonJson) {
+            setName(pokemonJson);
+            setSprite(pokemonJson);
+            setStats(pokemonJson);
+        }
+        // Função para buscar os dados de um Pokémon usando a API
+        const fetchPokemon = (name) => {
+            const url = `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`;
+            fetch(url)
+                .then((resp) => resp.json())
+                .then(setPokemonData)
+                .catch((err) => {
+                    // Em caso de erro, limpa os dados do Pokémon e exibe um alerta com o erro
+                    cleanPokemonData();
+                    alert(err);
+                });
+        };
+        // Adiciona um evento para carregar os dados do Pokémon 'pikachu' quando a página é carregada
+        window.addEventListener('load', (event) => {
+            fetchPokemon('pikachu');
+        });
+    </script>
+</body>
+
+</html>
